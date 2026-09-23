@@ -1,73 +1,40 @@
-# React + TypeScript + Vite
+# DeepSeek-V4-Pro 推理流水线可视化
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> ## 🔗 在线体验：<https://ezeror.github.io/DeepSeek-V4-Pro-PipeLine-viz/>
+>
+> **无需安装，打开即用** —— 悬停查看任意算子的输入/输出张量维度与量化精度，点击查看算子详解。
 
-Currently, two official plugins are available:
+[![Deploy to GitHub Pages](https://github.com/EZeRor/DeepSeek-V4-Pro-PipeLine-viz/actions/workflows/deploy.yml/badge.svg)](https://github.com/EZeRor/DeepSeek-V4-Pro-PipeLine-viz/actions/workflows/deploy.yml)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+一个交互式网页，可视化展示 DeepSeek-V4-Pro 大模型（1.6T 参数 MoE，1M 上下文）从 token 输入到 token 输出的完整推理流程。
 
-## React Compiler
+## ✨ 功能
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **主流水线视图**：输入文本 → Tokenizer → Embedding → 61 层 Transformer Block → LM Head → 采样 → Detokenize 的完整旅程，连线上直接标注张量形状与精度（如 `[n, 7168] BF16`）
+- **Hover 悬浮提示**：任意算子节点悬停即显示输入/输出张量的名称、形状、dtype/量化精度，附符号图例
+- **点击详情面板**：算子作用详解、完整张量表、量化方案、数据来源标注（官方报告 / config / 推算）
+- **层选择器（1–61）**：按真实排布自动切换 CSA（压缩率 4、FP4 Lightning Indexer、Top-1024）/ HCA（压缩率 128、密集注意力）路径，前 3 层标注 Hash 路由
+- **prefill / decode 切换**：高亮 KV cache 读写路径，展示两阶段的算力/访存特征差异
+- **量化图例**：FP4 MXFP4 / FP8 E4M3 / BF16 / FP32 等六种精度颜色编码，节点徽章一目了然
 
-## Expanding the ESLint configuration
+## 🛠 本地开发
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # 开发服务器
+npm run build    # 生产构建 → dist/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+push 到 `main` 分支后，GitHub Actions 自动构建并发布到 GitHub Pages。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📚 数据来源
+
+- DeepSeek V4 官方技术报告：[arXiv:2606.19348](https://arxiv.org/abs/2606.19348)
+- 官方配置：[config.json](https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/resolve/main/config.json)
+- 算子数据模型：[`src/data/pipeline.ts`](src/data/pipeline.ts)（视图与数据分离，欢迎 PR 补充）
+
+## 技术栈
+
+React 19 + TypeScript + Vite 7 + Tailwind CSS 3 + shadcn/ui
